@@ -27,7 +27,7 @@ abstract: |
   
 keywords          : "keywords"
 wordcount         : "X"
-bibliography      : ["researchcit.bib"]
+bibliography      : "researchcit.bib"
 floatsintext      : no
 figurelist        : no
 tablelist         : no
@@ -113,5 +113,5 @@ I found that there is an increased presence of congresspeople that lobby using m
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 
-<div id="refs" custom-style="Bibliography"></div>
+<div id="r_refs" custom-style="Bibliography"></div>
 \endgroup
