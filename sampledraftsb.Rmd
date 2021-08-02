@@ -42,26 +42,33 @@ classoption       : "man"
 
 ```{r setup, include = FALSE}
 library("papaja")
-r_refs("researchcit.bib")
+r_refs("/Users/samihabhushan/Documents/financial/researchcit.bib")
 ```
 
-```{r analysis-preferences, echo=TRUE}
+```{r analysis-preferences1, echo=TRUE}
 # selin estimate data
 data1 <- read.csv(("/Users/samihabhushan/Downloads/selindatacsv.csv"), header=T)
-data1
 #library(knitr)
 #kable(data1, caption = "Selin Independence Estimates")
+library(kableExtra)
+data1 %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
 ```
 
-```{r analysis-preference, echo=TRUE}
-# congress sample code
+
+```{r analysis-preference3, echo=TRUE}
+#congress sample data
 data2 <- read.csv(("/Users/samihabhushan/Downloads/congress.csv"), header=T)
-data2
+#data2
 #library(knitr)
 #kable(data1, caption = "Congress sample sheet")
+
+library(kableExtra)
+data2 %>%
+  kbl() %>%
+  kable_styling()
 ```
-
-
 
 # Theory
 Jennifer Selin concludes that "a lack of influence is correlated with statutory provisions that insulate agency policy decisions from review by political principals" (Selin, 2015). This means the main indication of an agency's independence comes from additional clauses in its statute to ensure strict limitations on policy reviews and other decisions from political forces, as opposed to the number of oversight committees for instance. Likewise, the FTC has become more independent over time, according to Selin, due to additional policy features put in place to prevent political interference, including the employment of administrative law judges. Selin found that generally financial agencies had the largest increase in independence over time. 
