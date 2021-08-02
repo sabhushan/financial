@@ -27,7 +27,7 @@ abstract: |
   
 keywords          : "keywords"
 wordcount         : "X"
-bibliography      : "researchcit.bib"
+bibliography      : /Users/samihabhushan/Documents/financial/researchcit.bib
 floatsintext      : no
 figurelist        : no
 tablelist         : no
@@ -45,30 +45,6 @@ library("papaja")
 r_refs("/Users/samihabhushan/Documents/financial/researchcit.bib")
 ```
 
-```{r analysis-preferences1, echo=TRUE}
-# selin estimate data
-data1 <- read.csv(("/Users/samihabhushan/Downloads/selindatacsv.csv"), header=T)
-#library(knitr)
-#kable(data1, caption = "Selin Independence Estimates")
-library(kableExtra)
-data1 %>%
-  kbl() %>%
-  kable_paper("hover", full_width = F)
-```
-
-
-```{r analysis-preference3, echo=TRUE}
-#congress sample data
-data2 <- read.csv(("/Users/samihabhushan/Downloads/congress.csv"), header=T)
-#data2
-#library(knitr)
-#kable(data1, caption = "Congress sample sheet")
-
-library(kableExtra)
-data2 %>%
-  kbl() %>%
-  kable_styling()
-```
 
 # Theory
 Jennifer Selin concludes that "a lack of influence is correlated with statutory provisions that insulate agency policy decisions from review by political principals" (Selin, 2015). This means the main indication of an agency's independence comes from additional clauses in its statute to ensure strict limitations on policy reviews and other decisions from political forces, as opposed to the number of oversight committees for instance. Likewise, the FTC has become more independent over time, according to Selin, due to additional policy features put in place to prevent political interference, including the employment of administrative law judges. Selin found that generally financial agencies had the largest increase in independence over time. 
@@ -113,7 +89,7 @@ The research design additionally combines data from a previous study conducted b
 
 I will also use qualitative textual analysis in addition to the hand coding to see if elected officials use more partisan rhetoric over time. In this study, “partisan rhetoric” refers to an individual making positive assertions about their own party or negative assertions about the opposing party. I will also examine whether the demands of elected officials that are the same party as the President are increasingly met over those of the opposing party. 
 
-#Hand-coding
+# Hand-coding
 
 
 ```{r analysis-preference3, echo=TRUE}
@@ -129,9 +105,15 @@ data2 %>%
   kable_styling()
 ```
 
-docket_url: Link to proposed and final rules in the the docket.
-document_id: Unique comment ID
-organization: Name of mobilizing force
+**docket_url:** Link to proposed and final rules in the the docket.
+
+**document_id:** Unique comment ID
+
+**organization:** Name of mobilizing force
+
+**org_name:** Name(s) of congresspeople represented in the comment. 
+
+**position:** A number from -2 (strongly opposed) to 2 (strongly supports)
 
 
 ## Data analysis
@@ -143,14 +125,4 @@ I found that there is an increased presence of congresspeople that lobby using m
 
 # Discussion
 
-
-\newpage
-
 # References
-
-\begingroup
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-
-<div id="r_refs" custom-style="Bibliography"></div>
-\endgroup
