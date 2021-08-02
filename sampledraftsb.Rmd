@@ -48,11 +48,13 @@ r_refs("/Users/samihabhushan/Documents/financial/researchcit.bib")
 
 # Theory
 **Mechanisms behind agency independance**
+
 Jennifer Selin concludes that "a lack of influence is correlated with statutory provisions that insulate agency policy decisions from review by political principals" (Selin, 2015). This means the main indication of an agency's independence comes from additional clauses in its statute to ensure strict limitations on policy reviews and other decisions from political forces, as opposed to the number of oversight committees for instance. Likewise, the FTC has become more independent over time, according to Selin, due to additional policy features put in place to prevent political interference, including the employment of administrative law judges. Selin found that generally financial agencies had the largest increase in independence over time. 
 
 As stated by King et al. (1994), "the best way to understand a particular event may be by using the methods of scientific inference also to study systematic patterns in similar parallel events." The aforementioned trend should translate beyond the years the study was conducted, translating into the Trump administraton, with agencies such as the FTC and CFPB maintaining or increasing their level of agency independence as much of the structural clauses implemented to maintain agency independence were retained. For example, the U.S. Supreme Court maintained the clause that subject the removal of the director for the CFPB subject to the President's discretion, after a petitioner challenged its constitutionality (Seila Law v. CFPB, 2020). That is to say, while there a high estimate of independence for financial agencies, no agency is immune to political influence. Selin cited that while Securities and Exchange Commission’s (SEC’s) has high estimates, 3.566, SEC policy reflected presidential preferences during the financial crisis in 2008. As such, even with relatively high estimates of independence of financial agencies, we should see some evidence of political influence. 
 
 **"Information capture" in regulations**
+
 Wendy Wagner provides comprehensive insight into the phenomenon of "information capture" through a regulatory framework. According to her article, "information capture refers to the excessive use of information and related information costs as a means of gaining control over regulatory decisionmaking in informal
 rulemakings." This is often seen in sophisticated lobbying by corporations. For instance, they often use lawyers to use extremely advanced and often confusing language to pressure regulatory agencies into meeting their demands (Wagner, 2010). We can, in turn, see this happen to Congresspeople as well, where lawyers may use language to mislead them into thinking that they are advocating for the people as opposed to a profit-driven incentive. Therefore, more congresspeople that side with businesses not simple for a private purpose, but also because they believe they are serving the people. 
 
@@ -117,12 +119,18 @@ data2 %>%
 
 **position:** A number from -2 (strongly opposed) to 2 (strongly supports)
 
+
 ## Data analysis
 We used `r cite_r("researchcit.bib")` for all our analyses.
 
 
 # Results
-I found that there is an increased presence of congresspeople that lobby using more public-facing language. 
+```{r analysis-preferences7, echo=TRUE}
+# Number of congresspeople  data
+data4 <- read.csv(("/Users/samihabhushan/Documents/financial/congressno.csv"), header=F)
+data4
+```
+
 
 # Discussion
 
