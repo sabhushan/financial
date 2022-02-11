@@ -243,22 +243,48 @@ install.packages(``googlesheets4'')
 library(googlesheets4)
 congress\_data \textless- read\_sheet(``\url{https://docs.google.com/spreadsheets/d/1HBjG32qWVdf9YxfGPEJhNmSw65Z9XzPhHdDbLnc3mYc/edit?usp=sharing}'')
 
-congress\_data{[}!(is.na(congress\_data\(success) | congress_data\)success==``\,``), {]}
+\#congress\_data{[}!(is.na(congress\_data\(success) | congress_data\)success==``\,``), {]}
 \# select variables v1, v2, v3
 myvars \textless- c(``docket\_id,''``submitter\_name,'' ``position,'' ``success'')
 newdata \textless- congress\_data{[}myvars{]}
 clean\_congress \textless- newdata{[}!(is.na(newdata\(success) | newdata\)success==``\,``), {]}
+clean\_congress
 
 library(stringr)
 library(dplyr)
-financial\_rules \textless- c(``CFPB,'' ``OCC,'' ``IRS'')
+financial\_rules \textless- c(``CFPB,'' ``OCC,'' ``IRS,'' ``TREAS,'' ``FTC'')
 cfpbSubset \textless- clean\_congress{[}grep(``CFPB,'' clean\_congress\$docket\_id), {]}
-cfpbSubset
+occSubset \textless- clean\_congress{[}grep(``OCC,'' clean\_congress\$docket\_id), {]}
+irsSubset \textless- clean\_congress{[}grep(``IRS,'' clean\_congress\$docket\_id), {]}
+treasSubset \textless- clean\_congress{[}grep(``TREAS,'' clean\_congress\$docket\_id), {]}
+ftcSubset \textless- clean\_congress{[}grep(``FTC,'' clean\_congress\$docket\_id), {]}
 
 congresult \textless- filter(clean\_congress, grepl(paste(financial\_rules, collapse=``\textbar{}''), docket\_id))
 congresult
 
-summary(cfpbSubset)
+avg\_success \textless- c(mean(cfpbSubset\(success), mean(occSubset\)success), mean(irsSubset\(success), mean(treasSubset\)success), mean(ftcSubset\$success))
+avg\_success
+
+federal\_agencies \textless- read\_excel(``Documents/financial/federal\_agencies\_estimate.xlsx'')
+federal\_agencies\_estimate \textless- c(federal\_agencies\$Estimate)
+federal\_agencies\_estimate
+
+\hypertarget{merge-two-data-frames-by-id}{%
+\section{merge two data frames by ID}\label{merge-two-data-frames-by-id}}
+
+fed\_id \textless- merge(avg\_success,federal\_agencies)
+
+federal\_agencies\_table \textless- read\_excel(``Documents/financial/federal\_agencies\_merged.xlsx'')
+
+summary(federal\_agencies\_table)
+
+cor(federal\_agencies\_table\(Estimate, federal_agencies_table\)Avg\_Success)
+
+plot(Estimate \textasciitilde{} Avg\_Success, data=federal\_agencies\_table)
+
+fed\_estim.lm \textless- lm(Estimate \textasciitilde{} Avg\_Success, data=federal\_agencies\_table)
+
+summary(fed\_estim.lm)
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}

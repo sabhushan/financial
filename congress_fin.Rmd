@@ -20,21 +20,7 @@ authornote: |
   Enter author note here.
 
 abstract: |
-  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
-  
-  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
-  
-  One sentence clearly stating the **general problem** being addressed by  this particular study.
-  
-  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
-  
-  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
-  
-  One or two sentences to put the results into a more **general context**.
-  
-  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
-  
-  <!-- https://tinyurl.com/ybremelq -->
+  O
   
 keywords          : "keywords"
 wordcount         : "X"
@@ -97,31 +83,78 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 # Results
 
-
-install.packages('gsheet')
+```{r}
 library(gsheet)
 gsheet2tbl('https://docs.google.com/spreadsheets/d/1HBjG32qWVdf9YxfGPEJhNmSw65Z9XzPhHdDbLnc3mYc/edit?usp=sharing')
 
-install.packages("googlesheets4")
+#install.packages("googlesheets4")
 library(googlesheets4)
 congress_data <- read_sheet("https://docs.google.com/spreadsheets/d/1HBjG32qWVdf9YxfGPEJhNmSw65Z9XzPhHdDbLnc3mYc/edit?usp=sharing")
 
-congress_data[!(is.na(congress_data$success) | congress_data$success==""), ]
+#finding financial rules
+#congress_data[!(is.na(congress_data$success) | congress_data$success==""), ]
 # select variables v1, v2, v3
 myvars <- c("docket_id","submitter_name", "position", "success")
 newdata <- congress_data[myvars]
+#removing rows with no success coded
 clean_congress <- newdata[!(is.na(newdata$success) | newdata$success==""), ]
+clean_congress
 
+#creating new dataset with financial agencies and estimates
 library(stringr)
 library(dplyr)
-financial_rules <- c("CFPB", "OCC", "IRS")
+financial_rules <- c("CFPB", "OCC", "IRS", "TREAS", "FTC")
 cfpbSubset <- clean_congress[grep("CFPB", clean_congress$docket_id), ]
-cfpbSubset
+occSubset <- clean_congress[grep("OCC", clean_congress$docket_id), ]
+irsSubset <- clean_congress[grep("IRS", clean_congress$docket_id), ]
+treasSubset <- clean_congress[grep("TREAS", clean_congress$docket_id), ]
+ftcSubset <- clean_congress[grep("FTC", clean_congress$docket_id), ]
 
 congresult <- filter(clean_congress, grepl(paste(financial_rules, collapse="|"), docket_id))
 congresult
 
-summary(cfpbSubset)
+avg_success <- c(mean(cfpbSubset$success), mean(occSubset$success), mean(irsSubset$success), mean(treasSubset$success), mean(ftcSubset$success))
+avg_success
+
+library(readxl)
+federal_agencies <- read_excel("/Users/samihabhushan/Documents/financial/federal_agencies_estimate.xlsx")
+federal_agencies_estimate <- c(federal_agencies$Estimate)
+federal_agencies_estimate
+
+# merge two data frames by ID
+fed_id <- merge(avg_success,federal_agencies)
+
+
+federal_agencies_table <- read_excel("/Users/samihabhushan/Documents/financial/federal_agencies_merged.xlsx")
+
+summary(federal_agencies_table)
+
+cor(federal_agencies_table$Estimate, federal_agencies_table$Avg_Success)
+
+plot(Estimate ~ Avg_Success, data=federal_agencies_table)
+
+fed_estim.lm <- lm(Estimate ~ Avg_Success, data=federal_agencies_table)
+
+regression_fed <- summary(fed_estim.lm)
+```
+
+
+Running a multiple regression analysis on the overall average success and independence estimates, the correlation between the level of independence of federal agencies and average success overall for combined rules, the correlation coefficient is 'r cor(federal_agencies_table$Estimate, federal_agencies_table$Avg_Success)' and the r-squared value is 0.0043, suggesting that the 0.43% of variation in success is explained by agency's level of independence. 
+
+```{r}
+#formatting merged datasets
+knitr::kable(head(federal_agencies_table), "pipe")
+plot(federal_agencies_table)
+
+regression_fed <- summary(fed_estim.lm)
+
+apa_table(
+federal_agencies_table
+, caption = "Descriptive statistics of federal independence by agencies."
+, note = "avg success vs agencies"
+)
+```
+
 
 # Discussion
 
