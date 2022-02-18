@@ -17,8 +17,13 @@ https://sabhushan.github.io/financial/
 3. Sample regression outputs
 
 | docket_id  | congress | position | coalition | coalition_type  | ask | success  | response |
-| ------------- | ------------- |
 
+
+| docket_id | congress | position | coalition | coalition_type | ask | success | response |
+|-----------|----------|----------|-----------|----------------|-----|---------|----------|
+|           |          |          |           |                |     |         |          |
+|           |          |          |           |                |     |         |          |
+|           |          |          |           |                |     |         |          |
 
 ### Code
 
