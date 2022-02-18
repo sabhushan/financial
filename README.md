@@ -1,4 +1,4 @@
-# financial
+# Financial rulemaking
 Studying the effects of congressional campaigning on financial rulemaking 
 1. https://sabhushan.github.io/financial/financial-rulemaking.html 
 2. https://sabhushan.github.io/financial/
