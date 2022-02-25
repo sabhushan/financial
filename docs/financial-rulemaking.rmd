@@ -90,31 +90,162 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 ### Simulated Data
 
-To illustrate my planned analysis, I simulate data for each variable described above. 
 
-**Dependent variable:** *Congressional success* is drawn from a discrete distribution {-2, -1, 0, 1, 2}. 
+   
+---
+title: "Hypothesis testing of congressional success and members of Congress' political party"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
 
-**Explanatory variables:** *Coalition size* (a count) is drawn from a Poisson distribution. *Business colation* is binomial. In reality, business coalitions are more common than non-business coalitions, but here I estimate a balanced sample. I set rule pages constant at 85 and draw *comment lengths* from a Poisson distribution. While in reality, less than one percent of coalitions lobbying in rulemaking opt for a mass-comment campaign, I aim to gather a balanced sample, so half of the simulated data are assumed to have no mass comment campaign (*comments* = 1, *log(comments)* = 0) and the other half have a number of *comments* drawn from a Zero-Truncated Poisson distribution, which is then transformed to a log scale. 
+```{r setup, include=FALSE}
+## Sets defaults for R chunks
+knitr::opts_chunk$set(echo = TRUE, # echo = TRUE means that your code will show
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.path='figs/', ## where to save figures
+                      fig.height = 3,
+                      fig.width = 4,
+                      fig.align = 'center')
+## Add any R packages you require. 
+## Here are some we will use in 811:
+requires <- c("tidyverse", # tidyverse includes dplyr and ggplot2
+              "broom",
+              "haven", 
+              "devtools",
+              "magrittr",
+              "margins",
+              "lmtest",
+              "viridisLite",
+              "truncnorm",
+              "ggridges",
+              "here")
+## Install any you don't have
+to_install <- c(!requires %in% rownames(installed.packages()))
+install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
+## Load all required R packages
+library(tidyverse)
+library(broom)
+library(haven)
+library(magrittr)
+library(margins)
+library(here)
+library(ggplot2); theme_set(theme_bw()) # global plot theme
+## Colorblind and greyscale print-friendly scales
+library(viridisLite)
+  options(
+    ggplot2.continuous.color = "viridis",
+    ggplot2.continuous.fill = "viridis"
+  )
+  scale_color_discrete <- function(...)
+    scale_color_viridis_d(..., begin = 0, end = .7)
+  scale_fill_discrete <- function(...)
+    scale_fill_viridis_d(..., begin = 0, end = .7)
+```
 
-Table \@ref(tab:data-sim) shows ten rows of simulated data.
+Does either conformity or deviation from the party of the President affect congressional success?
+
+
+
+One measure of agency independence may be examined by studying the effects of congressmember's party affiliation and whether it conforms with the President's party affiliation.
+
+We have the following data for 60 congressmembers:
+
+`Success`: whether agencies fullfilled Congressmembers' demands, measured between -2 and 2.
+
+`Party`: "1" for if the party is the same for the congressmember and the President and "0" if the party is different between the congressmember and the President.
+
+`Independence`: The estimates of agency independence, derived from Selin's data.
+
+`Coalitions` : sizes of coalitions that the congressmember is affiliated with.
+
+
 
 ```{r data-sim}
 library(tidyverse)
 library(tibble)
 library(msm)
 library(kableExtra)
-coalition_success <- sample(x = c(-1, -.5, 0, .5, 1), 1000, prob = c(0.1, 0.3, .1, 0.4, 0.1), replace = T)
+congressional_success <- sample(x = c(-2, -1, 0, 1, 2), 1000, prob = c(0.1, 0.3, .1, 0.4, 0.1), replace = T)
 d = tibble(rule_id = c(1:1000, rep(1001:1500, 2)),
-           coalition_id = sample(1:2000),
+           congress_id = sample(1:2000),
            coalitions  = c(rep(1, 1000), rep(2, 1000)),
-           coalition_unopposed = c(rep(0, 1000), rep(1, 1000)),
-           coalition_success = c(coalition_success, sort(coalition_success)), 
+           party = c(rep(0, 1000), rep(1, 1000)),
+           congressional_success = c(congressional_success, sort(congressional_success)), 
            coalition_size = rtnorm(1000, mean = 5, sd= 10, lower = 1) %>% rep(2) %>% round(), 
-           coalition_business = sample(x = c(0,1), 2000, replace = T, prob = c(0.3, .7)), 
-           comment_length = round(rpois(2000, 10)/85 *100, 1), 
-           comments= c(rtnorm(1000, mean = 10000, sd = 100000, lower = 100), rep(1, 1000)) %>% sample() %>% round() , 
-           cong_support = c(rtnorm(1000, mean = 1, sd = 5, lower = 0), rep(0, 1000)) %>% sample() %>% round() )
-d %>% sample_n(10) %>% dplyr::select(rule_id, coalition_id, everything())
+           party_affiliation = sample(x = c(0,1), 2000, replace = T, prob = c(0.3, .7)), 
+           comments= c(rtnorm(1000, mean = 10000, sd = 100000, lower = 100), rep(1, 1000)) %>%
+sample() %>% round() , 
+           cong_support = c(rtnorm(1000, mean = 1, sd = 5, lower = 0), rep(0, 1000)) %>% sample() %>% round() )             
+d %>% sample_n(10) %>% dplyr::select(rule_id, congress_id, everything())
+```
+
+# Hypotheses
+
+H1: Members of Congress of the same party as the President have their demands fullfilled more often than congressmembers that are of a different politcal party. That is, the relationship between congressional success and agency independence differs by party affiliation. 
+
+H0: There is no difference in congressional success for members of Congress of the same of differing party of the President. That is, the relationship between congressional and agency independence does not differ by party affiliation. 
+
+# Linear regression
+
+The dependent variable is congressional success. For congressmember $i$, let congressional success be $y_i$ in the model $y_i = \beta_0 + ... + \epsilon_i$. $\beta_0$ is the predicted salary, $\hat{y}$, when all other variables in the model are 0.
+
+
+---
+
+## A model
+
+Does the model, $y_i = \beta_0 + \beta_1*party_i + \epsilon_i$, test the relationship of interest? 
+```{r gender_model, fig.height = 1}
+model <- lm(congressional_success ~ party, data = d) 
+m <- model %>% 
+  tidy(conf.int = TRUE) 
+m
+ggplot(m %>% filter(term != "(Intercept)")) + 
+  aes(x = term,
+      y = estimate, 
+      ymin = conf.low, 
+      ymax = conf.high) + 
+  geom_pointrange() + 
+  geom_hline(yintercept = 0, color = "grey") + 
+  coord_flip() + 
+  labs(x="", y="OLS Estimate")
+```
+
+```{r summary}
+# scatterplots
+ggplot(d) + 
+  aes(x = party, y = congressional_success) + 
+  geom_point(aes(alpha = coalition_size)) 
+p <- ggplot(d) + 
+  aes(x = party, y = congressional_success) + 
+  geom_point(aes(alpha = coalition_size))
+p
+```
+
+### data plot
+```{r gender_plot}
+# illustrating with yhat formula; more easily done with augment()
+b0 <- m$estimate[1]
+b1 <- m$estimate[2]
+p +
+  geom_line(aes(color = "Deviation", # yhat for opposition party
+                y = b0 + b1*1) ) + 
+  geom_line(aes(color = "Conformity", # yhat for same party
+                y = b0 + b1*0) )  +
+  geom_ribbon(aes(ymax = b0 + b1*1, 
+                  ymin = b0 + b1*0), alpha = .1, color = NA)
+```
+
+t-test (compare model output to simple t-test of difference in mean `congressional success` by `party`).
+```{r}
+# tidy model output object
+m 
+# t-test
+t.test(congressional_success ~ party, data = d) %>% tidy()
 ```
 
 ```{r hist-coalitions-sim, fig.width=2, fig.height=2,  out.width = "30%"}
