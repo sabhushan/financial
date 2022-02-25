@@ -36,6 +36,48 @@ affiliation:
 ```{r setup, include = FALSE}
 library("papaja")
 r_refs("r-references.bib")
+## Sets defaults for R chunks
+knitr::opts_chunk$set(echo = TRUE, # echo = TRUE means that your code will show
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.path='figs/', ## where to save figures
+                      fig.height = 3,
+                      fig.width = 4,
+                      fig.align = 'center')
+## Add any R packages you require. 
+## Here are some we will use in 811:
+requires <- c("tidyverse", # tidyverse includes dplyr and ggplot2
+              "broom",
+              "haven", 
+              "devtools",
+              "magrittr",
+              "margins",
+              "lmtest",
+              "viridisLite",
+              "truncnorm",
+              "ggridges",
+              "here")
+## Install any you don't have
+to_install <- c(!requires %in% rownames(installed.packages()))
+install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
+## Load all required R packages
+library(tidyverse)
+library(broom)
+library(haven)
+library(magrittr)
+library(margins)
+library(here)
+library(ggplot2); theme_set(theme_bw()) # global plot theme
+## Colorblind and greyscale print-friendly scales
+library(viridisLite)
+  options(
+    ggplot2.continuous.color = "viridis",
+    ggplot2.continuous.fill = "viridis"
+  )
+  scale_color_discrete <- function(...)
+    scale_color_viridis_d(..., begin = 0, end = .7)
+  scale_fill_discrete <- function(...)
+    scale_fill_viridis_d(..., begin = 0, end = .7)
 ```
 
 ```{r analysis-preferences}
@@ -90,69 +132,13 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 ### Simulated Data
 
-
-   
----
-title: "Hypothesis testing of congressional success and members of Congress' political party"
-output:
-  html_document:
-    code_folding: hide
-    toc: true
-    toc_float: true
----
-
-```{r setup, include=FALSE}
-## Sets defaults for R chunks
-knitr::opts_chunk$set(echo = TRUE, # echo = TRUE means that your code will show
-                      warning=FALSE,
-                      message=FALSE,
-                      fig.path='figs/', ## where to save figures
-                      fig.height = 3,
-                      fig.width = 4,
-                      fig.align = 'center')
-## Add any R packages you require. 
-## Here are some we will use in 811:
-requires <- c("tidyverse", # tidyverse includes dplyr and ggplot2
-              "broom",
-              "haven", 
-              "devtools",
-              "magrittr",
-              "margins",
-              "lmtest",
-              "viridisLite",
-              "truncnorm",
-              "ggridges",
-              "here")
-## Install any you don't have
-to_install <- c(!requires %in% rownames(installed.packages()))
-install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
-## Load all required R packages
-library(tidyverse)
-library(broom)
-library(haven)
-library(magrittr)
-library(margins)
-library(here)
-library(ggplot2); theme_set(theme_bw()) # global plot theme
-## Colorblind and greyscale print-friendly scales
-library(viridisLite)
-  options(
-    ggplot2.continuous.color = "viridis",
-    ggplot2.continuous.fill = "viridis"
-  )
-  scale_color_discrete <- function(...)
-    scale_color_viridis_d(..., begin = 0, end = .7)
-  scale_fill_discrete <- function(...)
-    scale_fill_viridis_d(..., begin = 0, end = .7)
-```
-
 Does either conformity or deviation from the party of the President affect congressional success?
 
 
 
 One measure of agency independence may be examined by studying the effects of congressmember's party affiliation and whether it conforms with the President's party affiliation.
 
-We have the following data for 60 congressmembers:
+We have the following data for 10 congressmembers:
 
 `Success`: whether agencies fullfilled Congressmembers' demands, measured between -2 and 2.
 
@@ -173,10 +159,10 @@ congressional_success <- sample(x = c(-2, -1, 0, 1, 2), 1000, prob = c(0.1, 0.3,
 d = tibble(rule_id = c(1:1000, rep(1001:1500, 2)),
            congress_id = sample(1:2000),
            coalitions  = c(rep(1, 1000), rep(2, 1000)),
-           party = c(rep(0, 1000), rep(1, 1000)),
            congressional_success = c(congressional_success, sort(congressional_success)), 
            coalition_size = rtnorm(1000, mean = 5, sd= 10, lower = 1) %>% rep(2) %>% round(), 
-           party_affiliation = sample(x = c(0,1), 2000, replace = T, prob = c(0.3, .7)), 
+           party_affiliation = sample(x = c(0,1), 2000, replace = T, prob = c(0.7, .3)),
+           independence = sample(x = c(4.1,1.643,0.174,0.218,2.269), 2000, replace = T),
            comments= c(rtnorm(1000, mean = 10000, sd = 100000, lower = 100), rep(1, 1000)) %>%
 sample() %>% round() , 
            cong_support = c(rtnorm(1000, mean = 1, sd = 5, lower = 0), rep(0, 1000)) %>% sample() %>% round() )             
@@ -200,7 +186,7 @@ The dependent variable is congressional success. For congressmember $i$, let con
 
 Does the model, $y_i = \beta_0 + \beta_1*party_i + \epsilon_i$, test the relationship of interest? 
 ```{r gender_model, fig.height = 1}
-model <- lm(congressional_success ~ party, data = d) 
+model <- lm(congressional_success ~ party_affiliation, data = d) 
 m <- model %>% 
   tidy(conf.int = TRUE) 
 m
@@ -218,10 +204,10 @@ ggplot(m %>% filter(term != "(Intercept)")) +
 ```{r summary}
 # scatterplots
 ggplot(d) + 
-  aes(x = party, y = congressional_success) + 
+  aes(x = party_affiliation, y = congressional_success) + 
   geom_point(aes(alpha = coalition_size)) 
 p <- ggplot(d) + 
-  aes(x = party, y = congressional_success) + 
+  aes(x = party_affiliation, y = congressional_success) + 
   geom_point(aes(alpha = coalition_size))
 p
 ```
@@ -245,97 +231,30 @@ t-test (compare model output to simple t-test of difference in mean `congression
 # tidy model output object
 m 
 # t-test
-t.test(congressional_success ~ party, data = d) %>% tidy()
+t.test(congressional_success ~ party_affiliation, data = d) %>% tidy()
 ```
 
 ```{r hist-coalitions-sim, fig.width=2, fig.height=2,  out.width = "30%"}
-ggplot(d, aes(x = coalition_success)) + geom_histogram()+ labs(x = "Coalition Success")
-ggplot(d, aes(x = coalition_business)) + geom_histogram()+ labs(x = "Business Coalition")
+ggplot(d, aes(x = congressional_success)) + geom_histogram()+ labs(x = "Congressional Success")
+ggplot(d, aes(x = independence)) + geom_histogram()+ labs(x = "Independence")
 ggplot(d, aes(x = coalition_size)) + geom_histogram()+ labs(x = "Coalition size")
 ```
 
-```{r hist-comments-sim,  fig.width=3, fig.height=2, out.width = "49%"}
-ggplot(d, aes( x= comment_length)) + geom_histogram()+ labs(x = "% (Comment length/proposed rule length)*100")
-ggplot(d, aes( x= comments)) + geom_histogram() + labs(x = "Log(comments)")
+
+### Multiple linear regression
+$y_i = \beta_0 + \beta_1*party_i + \beta_2*independence_i + \epsilon_i$
+```{r}
+model <- lm(congressional_success ~ independence + party_affiliation + coalition_size, data = d)
+summary(model)
 ```
+
 
 ### Simulated Results
 
 Unsurprisingly this model yields no significant results (Figure \@ref(fig:model-success-plot-sim), Table \@ref(tab:mediation-sim)). With lobbying success as the dependent variable, the coefficient on the main variable of interest would be interpreted as a $\beta_{logmasscomments}$ increase in the five-point influence scale of lobbying success for each one-unit increase in the logged number of comments.
 
-```{r model-success-sim}
-m <- lm(coalition_success ~ 
-          log(comments) + 
-          comment_length + 
-          coalition_business +  
-          coalition_size + 
-          coalition_unopposed, 
-        data = d) 
-```
-
-```{r model-success-plot-sim,  fig.width=6, fig.height=2, out.width = "100%", fig.cap= "OLS model of coalition lobbying sucess with simulated data"}
-library(tidyverse)
-library(broom)
-m %>%
-  tidy(conf.int = TRUE) %>% 
-  filter(term != "(Intercept)") %>% 
-  ggplot() + 
-  geom_hline(yintercept = 0, color = "grey") + 
-  aes(x = term, 
-      y = estimate, 
-      ymin = conf.low, 
-      ymax = conf.high) + 
-  geom_pointrange( )  + 
-  coord_flip() +
-  labs(y = "Lobbying Success", 
-       x = "") 
-```
-
-To assess the extent to which congressional support mediates the influence of public pressure campaigns on rulemaking, I estimate the average conditional marginal effect (ACME, conditional on the number of comments from Members of Congress) and average direct effect (ADE) of mass comments using mediation analysis. Model 3 in table \@ref(tab:mediation-sim) replaces the dependent varible (lobbying success) with the mediator variable (the number of supportive members of Congress). 
-
-```{r mediation-sim}
-library(mediation)
-# model predicting mediator
-model.m <- lm(cong_support ~  log(comments) + comment_length + coalition_business+  coalition_size + coalition_unopposed, data = d) 
-# model predicting DV
-model.y <- lm(coalition_success ~ log(comments) + cong_support + comment_length + coalition_business+  coalition_size + coalition_unopposed, data = d) 
-med.cont <- mediate(model.m, model.y, sims=1000, treat = "log(comments)",
-mediator = "cong_support")
-# summary(med.cont)
-library(modelsummary)
-models <- list(
-  "1" = m,
-  "2" = model.y,
-  "3"  =  model.m
-)
-rows <- tibble(
-  term = c("Dependent Variable"),
-  `1` = c("Lobbying Success"), 
-  `2` =c("Lobbying Success"), 
-  `3`  = c("Members of Congress in Coalition")
-)
-
-attr(rows, 'position') <- c(0)
-
-# paper table 
-modelsummary::modelsummary( models,
-                            title = "Lobbying success and congressional support with simulated data",
-                            stars = TRUE, 
-                            #coef_omit = "president.*|agency.*|Intercept", 
-                            # coef_map = cm,
-                          add_rows = rows, 
-                          notes = "") %>% 
-  row_spec(row = 1, bold = T)
-```
 
 
-The average effect of the logged number of comments, conditional on letters from members of congress (the ACME) is `r round(med.cont$d.avg, 2)`, with a p value of `r round(med.cont$d0.p, 2)`.
-
-The average direct effect (ADE) of the logged number of comments on lobbying success is `r round(med.cont$z0, 2)`, with a p value of `r round(med.cont$z0.p, 2)`
-
-The Total Effect of a one-unit increase in the logged number of comments is `r round(med.cont$tau.coef, 2)`, with a p value of `r round(med.cont$tau.p, 2)`. `r round(med.cont$n0, 2)` of this is mediated through mobilizing congressional attention (p-value = `r round(med.cont$n0.p, 2)`).
-
-Running a multiple regression analysis on the overall average success and independence estimates, the correlation between the level of independence of federal agencies and average success overall for combined rules, the correlation coefficient is 'r cor(federal_agencies_table$Estimate, federal_agencies_table$Avg_Success)' and the r-squared value is 0.0043, suggesting that the 0.43% of variation in success is explained by agency's level of independence. 
 
 
 
