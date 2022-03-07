@@ -86,6 +86,29 @@ set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
+<!-- An R chunk to load data -->
+```{r data}
+library(googlesheets4)
+d1 <- read_sheet("https://docs.google.com/spreadsheets/d/1HBjG32qWVdf9YxfGPEJhNmSw65Z9XzPhHdDbLnc3mYc/edit?usp=sharing")
+load("/Users/samihabhushan/Downloads/members (1).Rdata")
+d3 <- read.table(file = "/Users/samihabhushan/financial/data/federal_agencies_clean.xlsx", sep="\t", header = TRUE)
+```
+
+```{r real_data}
+#assigning members to opposing or deviating 
+#year comes from comments datasheet and party_name comes from members ds
+for (member in members){ 
+  if (congress_data["Year"] < 2016 & members["party_name"] == "Republican Party"){
+    party_affiliation == 0
+  }if (congress_data["Year"] > 2016 & members["party_name"] == "Republican Party"){
+    party_affiliation == 1
+  } else {
+    party_affiliation == 1
+  }
+}
+    
+
+```
 #Research Questions
 
 Does variation in financial agencies' independence affect congressional success in rulemaking?
@@ -96,6 +119,10 @@ Does either conformity or deviation from the party of the President affect congr
 
 Do members of Congress increasingly utilize partisan rhetoric over time to influence success within financial agency rulemaking?
  - Does variation in partisan rhetoric affect congressional success?
+
+#Abstract 
+(125 words)
+The outcomes to federal rulemaking proposals in response to congressional lobbying is integral towards understanding how government institutions work. However, federal agencies vary in level of independence, as measured by how responsive they are to public demands. Previous studies have shown that federal agency rulemaking, especially within the financial divisions, has become more independent over time, with agencies becoming less responsive to public comments. Using data from prior studies conducted by Dr. Jennifer Selin and Dr. Devin Judge-Lord, I seek to study whether this pattern can be seen within the congressional sphere — i.e. if financial federal agencies are responsive to congressmembers’ demands. I also attempt to see if there may be any change of influence for those within the same or opposing party of the President.
 
 
 # Methods
@@ -148,7 +175,11 @@ We have the following data for 10 congressmembers:
 
 `Coalitions` : sizes of coalitions that the congressmember is affiliated with.
 
+**Dependent variable:** *Congressional success* is drawn from a discrete distribution {-2, -1, 0, 1, 2}. 
 
+**Explanatory variables:** *Coalition size* (a count) is drawn from a Poisson distribution. *Business colation* is binomial. In reality, business coalitions are more common than non-business coalitions, but here I estimate a balanced sample. I set rule pages constant at 85 and draw *comment lengths* from a Poisson distribution. While in reality, less than one percent of coalitions lobbying in rulemaking opt for a mass-comment campaign, I aim to gather a balanced sample, so half of the simulated data are assumed to have no mass comment campaign (*comments* = 1, *log(comments)* = 0) and the other half have a number of *comments* drawn from a Zero-Truncated Poisson distribution, which is then transformed to a log scale. 
+
+Table \@ref(tab:data-sim) shows ten rows of simulated data.
 
 ```{r data-sim}
 library(tidyverse)
