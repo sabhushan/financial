@@ -8,8 +8,12 @@ title: "Have federal agencies become more partisan over time?"
 #   email: my@email.com
 # shorttitle: Do members of Congress have an increasing level of influence on the outcome
 #   of federal agency financial rulemaking?
-# output:
-#   html_document:
+output:
+    html_document:
+      highlight: zenburn
+      toc: true
+      toc_float: true
+      code_folding: hide
 #     df_print: paged
 # authornote: |
 #   Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
